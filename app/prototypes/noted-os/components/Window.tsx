@@ -23,6 +23,7 @@ export function Window({ data, children, onMove, onClose, onMinimize, onMaximize
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const windowRef = useRef<HTMLDivElement>(null);
+  const previousPosition = useRef(data.position);
 
   useEffect(() => {
     if (!isDragging) return;
@@ -30,27 +31,38 @@ export function Window({ data, children, onMove, onClose, onMinimize, onMaximize
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
       
-      const newX = e.clientX - dragOffset.x;
-      const newY = e.clientY - dragOffset.y;
+      const newX = Math.max(0, e.clientX - dragOffset.x);
+      const newY = Math.max(0, e.clientY - dragOffset.y);
       
-      onMove(data.id, newX, newY);
+      // Only update if position has changed
+      if (newX !== previousPosition.current.x || newY !== previousPosition.current.y) {
+        previousPosition.current = { x: newX, y: newY };
+        onMove(data.id, newX, newY);
+      }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
     };
 
+    // Handle cases where mouse moves outside window
+    const handleBlur = () => {
+      setIsDragging(false);
+    };
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('blur', handleBlur);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('blur', handleBlur);
     };
   }, [isDragging, dragOffset, data.id, onMove]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!windowRef.current) return;
+    if (!windowRef.current || e.button !== 0) return; // Only handle left click
     
     const rect = windowRef.current.getBoundingClientRect();
     setDragOffset({
@@ -58,6 +70,9 @@ export function Window({ data, children, onMove, onClose, onMinimize, onMaximize
       y: e.clientY - rect.top
     });
     setIsDragging(true);
+    
+    // Prevent text selection while dragging
+    e.preventDefault();
   };
 
   if (data.isMinimized) {
@@ -74,22 +89,45 @@ export function Window({ data, children, onMove, onClose, onMinimize, onMaximize
   };
 
   return (
-    <div ref={windowRef} className={styles.window} style={style}>
-      <div className={styles.windowHeader} onMouseDown={handleMouseDown}>
+    <div 
+      ref={windowRef} 
+      className={styles.window} 
+      style={style}
+      onMouseDown={(e) => {
+        // Bring window to front on click
+        if (e.currentTarget === e.target) {
+          e.currentTarget.style.zIndex = '1000';
+        }
+      }}
+    >
+      <div 
+        className={styles.windowHeader} 
+        onMouseDown={handleMouseDown}
+        onDoubleClick={onMaximize}
+      >
         <div className={styles.windowControls}>
           <button
             className={`${styles.windowControl} ${styles.closeButton}`}
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             title="Close"
           />
           <button
             className={`${styles.windowControl} ${styles.minimizeButton}`}
-            onClick={onMinimize}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMinimize();
+            }}
             title="Minimize"
           />
           <button
             className={`${styles.windowControl} ${styles.maximizeButton}`}
-            onClick={onMaximize}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMaximize();
+            }}
             title="Maximize"
           />
         </div>

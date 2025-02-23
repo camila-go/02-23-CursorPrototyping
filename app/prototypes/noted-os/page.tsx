@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './styles.module.css';
 import { Window } from './components/Window';
 import { TextEditor } from './components/TextEditor';
@@ -19,21 +19,32 @@ interface WindowData {
 }
 
 export default function NotedOS() {
+  const [mounted, setMounted] = useState(false);
   const [windows, setWindows] = useState<WindowData[]>([]);
   const [gridEnabled, setGridEnabled] = useState(true);
 
+  // Handle hydration and initial load
   useEffect(() => {
-    // Load saved windows from localStorage
-    const savedWindows = localStorage.getItem('notedos-windows');
-    if (savedWindows) {
-      setWindows(JSON.parse(savedWindows));
+    setMounted(true);
+    try {
+      const savedWindows = localStorage.getItem('notedos-windows');
+      if (savedWindows) {
+        setWindows(JSON.parse(savedWindows));
+      }
+    } catch (error) {
+      console.warn('Failed to load saved windows:', error);
     }
   }, []);
 
+  // Save windows
   useEffect(() => {
-    // Save windows to localStorage whenever they change
-    localStorage.setItem('notedos-windows', JSON.stringify(windows));
-  }, [windows]);
+    if (!mounted) return;
+    try {
+      localStorage.setItem('notedos-windows', JSON.stringify(windows));
+    } catch (error) {
+      console.warn('Failed to save windows:', error);
+    }
+  }, [mounted, windows]);
 
   const createNewWindow = (type: 'text' | 'drawing') => {
     const newWindow: WindowData = {
@@ -46,11 +57,11 @@ export default function NotedOS() {
       isMinimized: false,
       isMaximized: false,
     };
-    setWindows([...windows, newWindow]);
+    setWindows(prev => [...prev, newWindow]);
   };
 
   const updateWindowPosition = (id: string, x: number, y: number) => {
-    setWindows(windows.map(window => {
+    setWindows(prev => prev.map(window => {
       if (window.id === id) {
         return {
           ...window,
@@ -65,7 +76,7 @@ export default function NotedOS() {
   };
 
   const updateWindowContent = (id: string, content: string) => {
-    setWindows(windows.map(window => {
+    setWindows(prev => prev.map(window => {
       if (window.id === id) {
         const title = content.split('\n')[0].slice(0, 20) || window.title;
         return { ...window, content, title };
@@ -75,7 +86,7 @@ export default function NotedOS() {
   };
 
   const toggleWindowState = (id: string, state: 'isMinimized' | 'isMaximized') => {
-    setWindows(windows.map(window => {
+    setWindows(prev => prev.map(window => {
       if (window.id === id) {
         return { ...window, [state]: !window[state] };
       }
@@ -84,8 +95,13 @@ export default function NotedOS() {
   };
 
   const closeWindow = (id: string) => {
-    setWindows(windows.filter(window => window.id !== id));
+    setWindows(prev => prev.filter(window => window.id !== id));
   };
+
+  // Don't render until hydration is complete
+  if (!mounted) {
+    return <div className={styles.container} />;
+  }
 
   return (
     <div className={styles.container}>
