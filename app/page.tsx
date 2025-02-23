@@ -14,12 +14,11 @@ export default function Home() {
       description: 'Reusable components that you can use in your prototypes',
       path: '/prototypes/design-library'
     },
-    // Add your new prototypes here like this:
-    // {
-    //   title: 'Your new prototype',
-    //   description: 'A short description of what this prototype does',
-    //   path: '/prototypes/my-new-prototype'
-    // },
+    {
+      title: '🌈 Typography Experiments',
+      description: 'Interactive typography effects with Lisa Frank inspired design',
+      path: '/prototypes/typography-experiments'
+    }
   ];
 
   return (
@@ -46,7 +45,7 @@ export default function Home() {
               </h2>
               <p id={`desc-${index}`}>{prototype.description}</p>
               <span className="sr-only">
-                Click to explore {prototype.title.replace(/[✨🎨]/g, '')}
+                Click to explore {prototype.title.replace(/[✨🎨🌈]/g, '')}
               </span>
             </Link>
           ))}
