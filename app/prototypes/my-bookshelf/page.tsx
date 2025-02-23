@@ -16,6 +16,15 @@ interface Book {
   dateFinished: string | null;
 }
 
+interface ErrorDetails {
+  error: string;
+  details?: {
+    hasApiKey: boolean;
+    hasDatabaseId: boolean;
+    timestamp: string;
+  };
+}
+
 function BookCover({ src, title }: { src: string; title: string }) {
   if (!src) {
     return (
@@ -45,20 +54,26 @@ function BookCover({ src, title }: { src: string; title: string }) {
 export default function MyBookshelf() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorDetails | null>(null);
   const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await fetch('/api/books');
-        if (!response.ok) {
-          throw new Error('Failed to fetch books');
-        }
+        console.log('Fetching books...');
+        const response = await fetch('/prototypes/my-bookshelf/api/books');
         const data = await response.json();
+
+        if (!response.ok) {
+          console.error('API Error:', data);
+          throw new Error(data.error || 'Failed to fetch books');
+        }
+
+        console.log('Books fetched:', data);
         setBooks(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch books');
+        console.error('Error in component:', err);
+        throw err;
       } finally {
         setLoading(false);
       }
@@ -71,8 +86,45 @@ export default function MyBookshelf() {
     ? books 
     : books.filter(book => book.status.toLowerCase() === filter);
 
-  if (loading) return <div className={styles.container}>Loading...</div>;
-  if (error) return <div className={styles.container}>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingState}>
+          <h2>Loading your bookshelf...</h2>
+          <p>Connecting to Notion database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorState}>
+          <h2>Error Loading Books</h2>
+          <p className={styles.errorMessage}>{error.error}</p>
+          {error.details && (
+            <div className={styles.errorDetails}>
+              <p>Debug Information:</p>
+              <ul>
+                <li>Notion API Key: {error.details.hasApiKey ? 'Present' : 'Missing'}</li>
+                <li>Database ID: {error.details.hasDatabaseId ? 'Present' : 'Missing'}</li>
+                <li>Time: {new Date(error.details.timestamp).toLocaleString()}</li>
+              </ul>
+              <p className={styles.errorHelp}>
+                Please make sure you have:
+                <ol>
+                  <li>Added your Notion API key to .env.local</li>
+                  <li>Added the correct database ID to .env.local</li>
+                  <li>Shared the database with your Notion integration</li>
+                </ol>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -106,37 +158,48 @@ export default function MyBookshelf() {
         </div>
       </div>
       <div className={styles.grid}>
-        {filteredBooks.map((book) => (
-          <div key={book.id} className={styles.book}>
-            <div className={styles.status}>{book.status}</div>
-            <div className={styles.coverWrapper}>
-              <BookCover src={book.coverImage} title={book.title} />
-            </div>
-            <h2>{book.title}</h2>
-            <p className={styles.author}>by {book.author}</p>
-            <div className={styles.meta}>
-              <span className={styles.genre}>{book.genre}</span>
-              {book.rating > 0 && (
-                <span className={styles.rating}>
-                  {'★'.repeat(book.rating)}{'☆'.repeat(5-book.rating)}
-                </span>
+        {filteredBooks.length === 0 ? (
+          <div className={styles.noBooks}>
+            <p>No books found. Make sure you have:</p>
+            <ol>
+              <li>Connected to the correct Notion database</li>
+              <li>Shared the database with your integration</li>
+              <li>Added some books to your database</li>
+            </ol>
+          </div>
+        ) : (
+          filteredBooks.map((book) => (
+            <div key={book.id} className={styles.book}>
+              <div className={styles.status}>{book.status}</div>
+              <div className={styles.coverWrapper}>
+                <BookCover src={book.coverImage} title={book.title} />
+              </div>
+              <h2>{book.title}</h2>
+              <p className={styles.author}>by {book.author}</p>
+              <div className={styles.meta}>
+                <span className={styles.genre}>{book.genre}</span>
+                {book.rating > 0 && (
+                  <span className={styles.rating}>
+                    {'★'.repeat(book.rating)}{'☆'.repeat(5-book.rating)}
+                  </span>
+                )}
+              </div>
+              {book.dateStarted && (
+                <p className={styles.date}>
+                  Started: {new Date(book.dateStarted).toLocaleDateString()}
+                </p>
+              )}
+              {book.dateFinished && (
+                <p className={styles.date}>
+                  Finished: {new Date(book.dateFinished).toLocaleDateString()}
+                </p>
+              )}
+              {book.review && (
+                <p className={styles.review}>{book.review}</p>
               )}
             </div>
-            {book.dateStarted && (
-              <p className={styles.date}>
-                Started: {new Date(book.dateStarted).toLocaleDateString()}
-              </p>
-            )}
-            {book.dateFinished && (
-              <p className={styles.date}>
-                Finished: {new Date(book.dateFinished).toLocaleDateString()}
-              </p>
-            )}
-            {book.review && (
-              <p className={styles.review}>{book.review}</p>
-            )}
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

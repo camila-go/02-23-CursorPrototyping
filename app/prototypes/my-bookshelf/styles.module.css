@@ -157,4 +157,99 @@
   overflow: hidden;
   padding-top: 0.5rem;
   border-top: 1px solid #f0f0f0;
+}
+
+.loadingState,
+.errorState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loadingState h2,
+.errorState h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+}
+
+.loadingState p {
+  color: #666;
+}
+
+.errorMessage {
+  color: #dc2626;
+  font-weight: 500;
+  margin: 1rem 0;
+}
+
+.errorDetails {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e5e5;
+  text-align: left;
+}
+
+.errorDetails ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.errorDetails li {
+  color: #666;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.errorDetails li::before {
+  content: '•';
+  position: absolute;
+  left: 0.5rem;
+  color: #999;
+}
+
+.errorHelp {
+  margin-top: 1.5rem;
+  color: #666;
+}
+
+.errorHelp ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.errorHelp li {
+  margin: 0.5rem 0;
+}
+
+.noBooks {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.noBooks p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.noBooks ol {
+  text-align: left;
+  max-width: 400px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+}
+
+.noBooks li {
+  color: #666;
+  margin: 0.5rem 0;
+  line-height: 1.4;
 } 
