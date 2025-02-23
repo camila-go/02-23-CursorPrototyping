@@ -1,0 +1,77 @@
+---
+description: creating a new component
+globs: 
+---
+# Creating a new component
+
+When creating a new component, provide specifications in this format:
+
+```
+Create a new component named <name> with these specifications:
+1. Purpose: [Describe what the component does]
+2. Props: [List the props the component should accept]
+3. Variants: [List any visual variants needed]
+4. States: [List any states like hover, disabled, loading, etc.]
+5. Styling: [Describe any specific styling requirements]
+6. Behavior: [Describe any interactive behavior]
+7. Accessibility: [List any accessibility requirements]
+```
+
+## Example
+
+```
+Create a new component named Input with these specifications:
+1. Purpose: A text input field for forms
+2. Props:
+   - label: string
+   - placeholder: string
+   - error?: string
+   - type?: 'text' | 'password' | 'email'
+3. Variants:
+   - Default
+   - With error
+4. States:
+   - Default
+   - Focus
+   - Disabled
+   - Error
+5. Styling:
+   - Modern minimal design
+   - Subtle border that highlights on focus
+   - Error state should show red border
+6. Behavior:
+   - Show error message below input when error prop is provided
+   - Password type should have a show/hide password toggle
+7. Accessibility:
+   - Label should be properly associated with input
+   - Error messages should be announced by screen readers
+```
+
+## Implementation Details
+
+The component will be created following these established patterns:
+
+1. Directory Structure:
+   ```
+   app/components/
+   └── component-name/
+       ├── ComponentName.tsx
+       ├── ComponentName.module.css
+       └── index.ts
+   ```
+
+2. Implementation Features:
+   - TypeScript with proper type definitions
+   - CSS modules for scoped styling
+   - React.forwardRef when appropriate
+   - Comprehensive prop types
+   - Proper HTML semantics
+   - ARIA attributes for accessibility
+   - Modern React patterns and best practices
+
+3. Export Pattern:
+   ```typescript
+   // index.ts
+   export { ComponentName } from './ComponentName';
+   export type { ComponentNameProps } from './ComponentName';
+   ``` 

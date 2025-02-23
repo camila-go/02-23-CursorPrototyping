@@ -1,0 +1,11 @@
+---
+description: All headings (h1, h2, h3, etc.) should use sentence case instead of title case.
+globs: 
+---
+heading-case: All headings (h1, h2, h3, etc.) should use sentence case instead of title case. This means:
+- Only capitalize the first letter of the heading and proper nouns
+- Examples:
+  ✓ "Component library" (not "Component Library")
+  ✓ "Combined examples" (not "Combined Examples")
+  ✓ "Button variants" (not "Button Variants")
+- Exception: Product names and proper nouns should still be capitalized (e.g., "Getting started with Next.js")
