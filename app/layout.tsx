@@ -8,8 +8,14 @@
  */
 
 import type { Metadata } from "next";
-import { GeistSans, GeistMono } from 'geist/font';
+import { Inter } from 'next/font/google';
 import "./styles/globals.css";
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "Camila's prototypes",
@@ -26,11 +32,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={inter.variable}>
       <body>
         {children}
       </body>
