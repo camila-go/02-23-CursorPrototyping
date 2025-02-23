@@ -1,6 +1,6 @@
-import { Instrument_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 
-export const instrumentSans = Instrument_Sans({
+export const instrumentSans = Inter({
   subsets: ['latin'],
   display: 'swap',
 }); 
