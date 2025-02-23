@@ -23,6 +23,11 @@ export default function Home() {
       title: '🎹 Digital Piano',
       description: 'A Lisa Frank-inspired interactive piano with sound synthesis',
       path: '/prototypes/digital-piano'
+    },
+    {
+      title: '💾 Noted OS',
+      description: 'A nostalgic note-taking app with classic OS aesthetics and Lisa Frank vibes',
+      path: '/prototypes/noted-os'
     }
   ];
 
@@ -50,7 +55,7 @@ export default function Home() {
               </h2>
               <p id={`desc-${index}`}>{prototype.description}</p>
               <span className="sr-only">
-                Click to explore {prototype.title.replace(/[✨🎨🌈]/g, '')}
+                Click to explore {prototype.title.replace(/[✨🎨🌈🎹💾]/g, '')}
               </span>
             </Link>
           ))}
