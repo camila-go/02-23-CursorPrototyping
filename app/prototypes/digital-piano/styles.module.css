@@ -1,0 +1,173 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff61a6, #ff61d2);
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.pianoWrapper {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 0 30px rgba(255, 97, 210, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: #ff1493;
+  text-shadow: 2px 2px #ffb6c1;
+  font-weight: bold;
+}
+
+.keyboard {
+  display: flex;
+  gap: 2px;
+  position: relative;
+  padding: 1rem;
+  background: #ffd4e5;
+  border-radius: 10px;
+}
+
+.key {
+  position: relative;
+  border: none;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 1rem;
+}
+
+.white {
+  background: white;
+  width: 60px;
+  height: 200px;
+  border-radius: 0 0 8px 8px;
+  border: 2px solid #ffb6c1;
+}
+
+.black {
+  background: #333;
+  width: 40px;
+  height: 120px;
+  margin-left: -20px;
+  margin-right: -20px;
+  z-index: 2;
+  border-radius: 0 0 4px 4px;
+}
+
+.white:hover, .white.active {
+  background: linear-gradient(to bottom, #fff, #ffd4e5);
+  transform: translateY(2px);
+}
+
+.black:hover, .black.active {
+  background: linear-gradient(to bottom, #333, #666);
+  transform: translateY(2px);
+}
+
+.noteLabel {
+  font-size: 0.8rem;
+  color: #ff69b4;
+}
+
+.black .noteLabel {
+  color: #fff;
+}
+
+/* Lisa Frank Decorations */
+.decorations {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.star1, .star2 {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFD700' d='M12 0l3.09 9.26L24 12l-8.91 2.74L12 24l-3.09-9.26L0 12l8.91-2.74z'/%3E%3C/svg%3E");
+  background-size: contain;
+  animation: spin 3s linear infinite;
+}
+
+.star1 {
+  top: 10%;
+  left: 10%;
+}
+
+.star2 {
+  bottom: 10%;
+  right: 10%;
+  animation-delay: -1.5s;
+}
+
+.heart1, .heart2 {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23FF69B4' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+  background-size: contain;
+  animation: float 4s ease-in-out infinite;
+}
+
+.heart1 {
+  top: 20%;
+  right: 15%;
+}
+
+.heart2 {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: -2s;
+}
+
+.rainbow {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    #ff0000,
+    #ff8000,
+    #ffff00,
+    #00ff00,
+    #00ffff,
+    #0000ff,
+    #8000ff,
+    #ff0000
+  );
+  opacity: 0.1;
+  border-radius: 50%;
+  animation: rotate 10s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+} 

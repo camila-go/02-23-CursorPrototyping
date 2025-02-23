@@ -18,6 +18,11 @@ export default function Home() {
       title: '🌈 Typography Experiments',
       description: 'Interactive typography effects with Lisa Frank inspired design',
       path: '/prototypes/typography-experiments'
+    },
+    {
+      title: '🎹 Digital Piano',
+      description: 'A Lisa Frank-inspired interactive piano with sound synthesis',
+      path: '/prototypes/digital-piano'
     }
   ];
 
