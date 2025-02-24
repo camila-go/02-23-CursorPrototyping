@@ -9,6 +9,7 @@ interface Book {
   author: string;
   genre: string;
   coverImage: string;
+  allCoverImages: { url: string; type: string; }[];
   rating: number;
   review: string;
   status: string;
@@ -25,8 +26,19 @@ interface ErrorDetails {
   };
 }
 
-function BookCover({ src, title }: { src: string; title: string }) {
-  if (!src) {
+function BookCover({ src, title, allImages }: { src: string; title: string; allImages: { url: string; type: string; }[] }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const hasMultipleImages = allImages.length > 1;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const previousImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
+  if (!src && !hasMultipleImages) {
     return (
       <div className={styles.placeholderCover}>
         <span>{title}</span>
@@ -35,19 +47,28 @@ function BookCover({ src, title }: { src: string; title: string }) {
   }
 
   return (
-    <img 
-      src={src} 
-      alt={`Cover of ${title}`} 
-      className={styles.cover}
-      onError={(e) => {
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
-        target.parentElement?.classList.add(styles.placeholderCover);
-        const span = document.createElement('span');
-        span.textContent = title;
-        target.parentElement?.appendChild(span);
-      }}
-    />
+    <div className={styles.coverContainer}>
+      <img 
+        src={hasMultipleImages ? allImages[currentImageIndex].url : src}
+        alt={`Cover of ${title}`} 
+        className={styles.cover}
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+          target.parentElement?.classList.add(styles.placeholderCover);
+          const span = document.createElement('span');
+          span.textContent = title;
+          target.parentElement?.appendChild(span);
+        }}
+      />
+      {hasMultipleImages && (
+        <div className={styles.imageControls}>
+          <button onClick={previousImage} className={styles.imageButton}>&lt;</button>
+          <span className={styles.imageCounter}>{currentImageIndex + 1}/{allImages.length}</span>
+          <button onClick={nextImage} className={styles.imageButton}>&gt;</button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -172,7 +193,11 @@ export default function MyBookshelf() {
             <div key={book.id} className={styles.book}>
               <div className={styles.status}>{book.status}</div>
               <div className={styles.coverWrapper}>
-                <BookCover src={book.coverImage} title={book.title} />
+                <BookCover 
+                  src={book.coverImage} 
+                  title={book.title} 
+                  allImages={book.allCoverImages} 
+                />
               </div>
               <h2>{book.title}</h2>
               <p className={styles.author}>by {book.author}</p>

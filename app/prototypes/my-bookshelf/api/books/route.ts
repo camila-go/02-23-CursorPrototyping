@@ -65,42 +65,49 @@ export async function GET() {
 
     const books = response.results.map((page: any) => {
       const properties = page.properties;
-      const coverProperty = properties.Cover;
       
-      // Handle different types of cover images
-      let coverImage = '';
-      if (coverProperty) {
-        if (coverProperty.type === 'files' && coverProperty.files.length > 0) {
-          const file = coverProperty.files[0];
-          coverImage = file.type === 'external' ? file.external.url : file.file.url;
-        } else if (coverProperty.type === 'url') {
-          coverImage = coverProperty.url;
-        }
+      // Get all possible cover images
+      let coverImages = [];
+      
+      // 1. Check Cover property (files)
+      const coverProperty = properties.Cover;
+      if (coverProperty?.type === 'files') {
+        coverImages = coverProperty.files.map((file: any) => ({
+          url: file.type === 'external' ? file.external.url : file.file.url,
+          type: 'property'
+        }));
       }
       
-      if (!coverImage && page.cover) {
-        coverImage = page.cover.type === 'external' 
-          ? page.cover.external.url 
-          : page.cover.file.url;
+      // 2. Check Cover property (URL)
+      if (coverProperty?.type === 'url' && coverProperty.url) {
+        coverImages.push({
+          url: coverProperty.url,
+          type: 'property'
+        });
+      }
+      
+      // 3. Check page cover
+      if (page.cover) {
+        coverImages.push({
+          url: page.cover.type === 'external' ? page.cover.external.url : page.cover.file.url,
+          type: 'page'
+        });
       }
 
-      // Log the raw properties for debugging
-      console.log('API Route - Processing page:', {
-        id: page.id,
-        properties: Object.keys(properties),
-        propertyTypes: Object.fromEntries(
-          Object.entries(properties).map(([key, value]) => [key, (value as any).type])
-        ),
-        coverType: coverProperty?.type,
-        hasPageCover: !!page.cover,
+      // Log image sources for debugging
+      console.log('API Route - Cover images for:', properties.Title?.title[0]?.plain_text, {
+        coverImages,
+        hasCoverProperty: !!coverProperty,
+        hasPageCover: !!page.cover
       });
 
       const book = {
         id: page.id,
-        title: properties.Name?.title[0]?.plain_text || 'Untitled',
+        title: properties.Title?.title[0]?.plain_text || 'Untitled',
         author: properties.Author?.rich_text[0]?.plain_text || 'Unknown Author',
         genre: properties.Genre?.select?.name || 'Uncategorized',
-        coverImage,
+        coverImage: coverImages[0]?.url || '', // Use first available image
+        allCoverImages: coverImages, // Include all images
         rating: properties.Rating?.number || 0,
         review: properties.Review?.rich_text[0]?.plain_text || '',
         status: properties.Status?.select?.name || 'No Status',
