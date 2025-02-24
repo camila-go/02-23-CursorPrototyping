@@ -28,6 +28,11 @@ export default function Home() {
       title: '💾 Noted OS',
       description: 'A nostalgic note-taking app with classic OS aesthetics and Lisa Frank vibes',
       path: '/prototypes/noted-os'
+    },
+    {
+      title: '📚 My Bookshelf',
+      description: 'A personal bookshelf powered by Notion to track and display my reading collection',
+      path: '/prototypes/my-bookshelf'
     }
   ];
 
