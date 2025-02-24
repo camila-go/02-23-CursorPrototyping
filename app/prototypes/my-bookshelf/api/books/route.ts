@@ -2,6 +2,19 @@ import { Client } from '@notionhq/client';
 import { NextResponse } from 'next/server';
 import { isNotionClientError } from '@notionhq/client';
 
+interface NotionPage {
+  cover?: {
+    type: 'external' | 'file';
+    external?: { url: string };
+    file?: { url: string };
+  };
+  icon?: {
+    type: 'external' | 'file';
+    external?: { url: string };
+    file?: { url: string };
+  };
+}
+
 const notion = new Client({
   auth: process.env.NOTION_API_KEY,
 });
@@ -55,45 +68,67 @@ export async function GET() {
     // Now query the database contents
     const response = await notion.databases.query({
       database_id: databaseId,
+      sorts: [
+        {
+          property: 'Title',
+          direction: 'ascending',
+        },
+      ],
     });
 
-    console.log('API Route - Notion query response:', {
-      resultCount: response.results.length,
-      hasMore: response.has_more,
-      firstPageId: response.results[0]?.id,
-    });
+    console.log('API Route - Found', response.results.length, 'books');
 
-    const books = response.results.map((page: any) => {
+    const books = await Promise.all(response.results.map(async (page: any) => {
       const properties = page.properties;
-      const coverProperty = properties.Cover;
       
-      // Handle different types of cover images
+      // Log raw property data for debugging
+      console.log('Raw properties for book:', properties.Title?.title[0]?.plain_text, {
+        availableProperties: Object.keys(properties),
+        coverImageProperty: properties['Cover Image'],
+        coverImageType: properties['Cover Image']?.type,
+        coverImageFiles: properties['Cover Image']?.files,
+      });
+
+      // Enhanced cover image handling
       let coverImage = '';
-      if (coverProperty) {
-        if (coverProperty.type === 'files' && coverProperty.files.length > 0) {
-          const file = coverProperty.files[0];
-          coverImage = file.type === 'external' ? file.external.url : file.file.url;
-        } else if (coverProperty.type === 'url') {
-          coverImage = coverProperty.url;
+
+      // Try Cover Image property (files)
+      if (properties['Cover Image']?.type === 'files' && Array.isArray(properties['Cover Image'].files)) {
+        const files = properties['Cover Image'].files;
+        console.log('Files array:', files);
+        
+        if (files.length > 0) {
+          const file = files[0];
+          console.log('First file:', file);
+          
+          if (file.type === 'external') {
+            coverImage = file.external.url;
+          } else if (file.type === 'file') {
+            coverImage = file.file.url;
+          }
         }
       }
-      
-      if (!coverImage && page.cover) {
-        coverImage = page.cover.type === 'external' 
-          ? page.cover.external.url 
-          : page.cover.file.url;
+
+      // Try Cover Image property (URL)
+      if (!coverImage && properties['Cover Image']?.type === 'url') {
+        coverImage = properties['Cover Image'].url;
       }
 
-      // Log the raw properties for debugging
-      console.log('API Route - Processing page:', {
-        id: page.id,
-        properties: Object.keys(properties),
-        propertyTypes: Object.fromEntries(
-          Object.entries(properties).map(([key, value]) => [key, (value as any).type])
-        ),
-        coverType: coverProperty?.type,
-        hasPageCover: !!page.cover,
-      });
+      // Get the full page to try page cover
+      if (!coverImage) {
+        const fullPage = await notion.pages.retrieve({ page_id: page.id }) as unknown as NotionPage;
+        console.log('Full page data for cover:', {
+          hasPageCover: !!fullPage.cover,
+          coverType: fullPage.cover?.type,
+          pageIcon: fullPage.icon,
+        });
+
+        if (fullPage.cover) {
+          coverImage = fullPage.cover.type === 'external' && fullPage.cover.external
+            ? fullPage.cover.external.url 
+            : fullPage.cover.file?.url || '';
+        }
+      }
 
       const book = {
         id: page.id,
@@ -108,19 +143,24 @@ export async function GET() {
         dateFinished: properties['Date Finished']?.date?.start || null,
       };
 
+      console.log('Processed book:', {
+        title: book.title,
+        hasCover: !!coverImage,
+        coverUrl: coverImage,
+      });
+
       return book;
-    });
+    }));
 
     console.log('API Route - Processed books:', {
       count: books.length,
-      sampleTitles: books.slice(0, 2).map(b => b.title),
+      booksWithCovers: books.filter(b => b.coverImage).length,
     });
 
     return NextResponse.json(books);
   } catch (error) {
     console.error('API Route - Error:', error);
     
-    // Provide more detailed error response
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorResponse = {
       error: errorMessage,
